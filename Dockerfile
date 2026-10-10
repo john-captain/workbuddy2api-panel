@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1
 FROM golang:1.23-alpine AS build
+# GOPROXY 可覆盖：国内网络直连 proxy.golang.org 会超时，默认走 goproxy.cn。
+# 构建时可用 --build-arg GOPROXY=https://proxy.golang.org,direct 覆盖。
+ARG GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=${GOPROXY}
 WORKDIR /src
 COPY go.mod ./
 RUN go mod download
@@ -11,6 +15,13 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/wb2api ./cmd/serve
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/credit ./cmd/credit
 
 FROM alpine:3.20
+# ALPINE_MIRROR 可覆盖：国内直连 dl-cdn.alpinelinux.org 拉包极慢（实测卡在
+# python3 下载数分钟不动），构建时传 --build-arg ALPINE_MIRROR=mirrors.aliyun.com
+# 切到国内镜像。留空 = 用镜像自带源（海外构建无需改动）。
+ARG ALPINE_MIRROR=""
+RUN if [ -n "$ALPINE_MIRROR" ]; then \
+      sed -i "s|dl-cdn.alpinelinux.org|$ALPINE_MIRROR|g" /etc/apk/repositories; \
+    fi
 # python3：login.sh 的 JSON 解析 / 签到 / 落盘；bash：shell 脚本体。
 RUN apk add --no-cache wget ca-certificates tzdata python3 bash \
  && adduser -D -u 10001 app \

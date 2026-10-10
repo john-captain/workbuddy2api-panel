@@ -14,7 +14,9 @@ services:
     environment:
       - TZ=Asia/Shanghai
     ports:
-      - "7863:7863"
+      # 只绑本机回环：公网访问一律经 nginx HTTPS 反代（见 README「公网部署提示」）。
+      # 需要直连调试时改成 "7863:7863"，但务必先设置强 api_key。
+      - "127.0.0.1:7863:7863"
     volumes:
       - ./auths:/app/auths
       - ./data:/app/data
