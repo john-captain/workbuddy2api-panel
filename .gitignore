@@ -31,9 +31,10 @@ PLAN.md
 SPEC.md
 docs/
 
-# 设计/计划文档（但 README.md 必须进版本库）
+# 设计/计划文档（但仓根 README.md 必须进版本库。'/' 锚定不可省：
+# 写作 !README.md 会连带放行子目录 README，如 说明/README.md（含明文 api_key））
 *.md
-!README.md
+!/README.md
 
 # Windows binaries
 /wb2api.exe
